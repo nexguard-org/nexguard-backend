@@ -21,6 +21,7 @@ public class Database {
             props.load(ClassLoader.getSystemResourceAsStream("hibernate.properties"));
             config.setProperties(props);
             config.addAnnotatedClass(Source.class);
+            config.addAnnotatedClass(ValidAddress.class);
             ServiceRegistry registry = new StandardServiceRegistryBuilder()
                 .applySettings(config.getProperties())
                 .build();

@@ -1,10 +1,10 @@
 package com.lememz.nexguard;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
+import java.util.List;
+
+@SuppressWarnings("unused")
 @Entity
 public class Source {
     
@@ -12,6 +12,8 @@ public class Source {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private int id;
     private String name;
+    @OneToMany(mappedBy="source")
+    private List<ValidAddress> validAddress;
 
     public Source() {}
 
@@ -25,6 +27,10 @@ public class Source {
 
     public String getName() {
         return name;
+    }
+
+    public List<ValidAddress> getValidAddresses() {
+        return validAddress;
     }
 
     public void setName(String name) {
