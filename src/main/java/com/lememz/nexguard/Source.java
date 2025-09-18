@@ -2,6 +2,7 @@ package com.lememz.nexguard;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
@@ -13,7 +14,7 @@ public class Source {
     private int id;
     private String name;
     @OneToMany(mappedBy="source")
-    private List<ValidAddress> validAddress;
+    private List<ValidAddress> validAddresses;
 
     public Source() {}
 
@@ -30,7 +31,7 @@ public class Source {
     }
 
     public List<ValidAddress> getValidAddresses() {
-        return validAddress;
+        return validAddresses;
     }
 
     public void setName(String name) {

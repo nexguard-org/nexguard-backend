@@ -38,5 +38,5 @@ public class ValidAddress {
         this.type = type;
     }
 
-    public enum Type { EMAIL, PHONE_NUMBER }
+    public enum Type { EMAIL, PHONE_NUMBER, TEMPLATE }
 }

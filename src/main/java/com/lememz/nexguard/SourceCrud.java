@@ -4,15 +4,10 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.persistence.criteria.CriteriaQuery;
 
@@ -21,6 +16,8 @@ import jakarta.persistence.criteria.CriteriaQuery;
 public class SourceCrud {
     
     private final SessionFactory db;
+    @Value("${API_KEY}")
+    private String apiKey;
 
     public SourceCrud(SessionFactory db) {
         this.db = db;
@@ -40,16 +37,22 @@ public class SourceCrud {
     }
 
     @PostMapping("/")
-    public Source postSource(@RequestBody Source source) {
+    public ResponseEntity<Source> postSource(@RequestHeader(HttpHeaders.AUTHORIZATION) String auth, @RequestBody Source source) {
+        if(!auth.equals(apiKey)) {
+            return ResponseEntity.status(401).build();
+        }
         Session session = db.openSession();
         session.beginTransaction();
         session.persist(source);
         session.getTransaction().commit();
-        return source;
+        return ResponseEntity.ok(source);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Source> updateSource(@PathVariable int id, @RequestBody Source sourceUpdate) {
+    public ResponseEntity<Source> updateSource(@RequestHeader(HttpHeaders.AUTHORIZATION) String auth, @PathVariable int id, @RequestBody Source sourceUpdate) {
+        if(!auth.equals(apiKey)) {
+            return ResponseEntity.status(401).build();
+        }
         Session session = db.openSession();
         Source source = session.find(Source.class, id);
         if(source == null) {
@@ -62,7 +65,10 @@ public class SourceCrud {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Source> deleteSource(@PathVariable int id) {
+    public ResponseEntity<Void> deleteSource(@RequestHeader(HttpHeaders.AUTHORIZATION) String auth, @PathVariable int id) {
+        if(!auth.equals(apiKey)) {
+            return ResponseEntity.status(401).build();
+        }
         Session session = db.openSession();
         Source source = session.find(Source.class, id);
         if(source == null) {
@@ -71,6 +77,6 @@ public class SourceCrud {
         session.beginTransaction();
         session.remove(source);
         session.getTransaction().commit();
-        return ResponseEntity.ok(source);
+        return ResponseEntity.ok().build();
     }
 }
