@@ -22,7 +22,6 @@ public class SourceCrud {
     @Value("${API_KEY}")
     private String apiKey;
 
-
     @GetMapping("/{id}")
     public Source getSource(@PathVariable int id) {
         return em.find(Source.class, id);
