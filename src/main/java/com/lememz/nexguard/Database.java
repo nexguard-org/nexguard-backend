@@ -3,32 +3,38 @@ package com.lememz.nexguard;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.hibernate.SessionFactory;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.service.ServiceRegistry;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 
-@org.springframework.context.annotation.Configuration
+import javax.sql.DataSource;
+
+@Configuration
 public class Database {
-    
+
     @Bean
     @SuppressWarnings("CallToPrintStackTrace")
-    public SessionFactory getDb() {
+    public LocalSessionFactoryBean sessionFactory(DataSource dataSource) {
         try {
-            Configuration config = new Configuration();
+            LocalSessionFactoryBean factory = new LocalSessionFactoryBean();
             Properties props = new Properties();
             props.load(ClassLoader.getSystemResourceAsStream("hibernate.properties"));
-            config.setProperties(props);
-            config.addAnnotatedClass(Source.class);
-            config.addAnnotatedClass(ValidAddress.class);
-            ServiceRegistry registry = new StandardServiceRegistryBuilder()
-                .applySettings(config.getProperties())
-                .build();
-            return config.buildSessionFactory(registry);
+            factory.setHibernateProperties(props);
+            factory.setAnnotatedClasses(Source.class, ValidAddress.class);
+            factory.setDataSource(dataSource);
+            return factory;
         }catch(IOException e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    @Bean
+    public DataSource dataSource() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName("org.sqlite.JDBC");
+        dataSource.setUrl("jdbc:sqlite:database.db");
+        return dataSource;
     }
 }
