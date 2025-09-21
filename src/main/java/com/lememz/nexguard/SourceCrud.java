@@ -23,14 +23,27 @@ public class SourceCrud {
     private String apiKey;
 
     @GetMapping("/{id}")
-    public Source getSource(@PathVariable int id) {
-        return em.find(Source.class, id);
+    public ResponseEntity<Source> getSource(@RequestHeader(HttpHeaders.AUTHORIZATION) String auth, @PathVariable int id) {
+        Source source = em.find(Source.class, id);
+        if(source == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if(source.getPassword() != null &&
+                !apiKey.equals(auth) &&
+                !new BCryptPasswordEncoder().matches(auth, source.getPassword())
+        ) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(source);
     }
 
     @GetMapping("/")
-    public List<Source> getSources() {
+    public ResponseEntity<List<Source>> getSources(@RequestHeader(HttpHeaders.AUTHORIZATION) String auth) {
+        if(!auth.equals(apiKey)) {
+            return ResponseEntity.status(401).build();
+        }
         CriteriaQuery<Source> query = em.getCriteriaBuilder().createQuery(Source.class);
-        return em.createQuery(query.select(query.from(Source.class))).getResultList();
+        return ResponseEntity.ok(em.createQuery(query.select(query.from(Source.class))).getResultList());
     }
 
     @Transactional
@@ -57,7 +70,7 @@ public class SourceCrud {
             return ResponseEntity.status(401).build();
         }
         if(sourceUpdate.getName() != null) source.setName(sourceUpdate.getName());
-        if(sourceUpdate.getPassword() != null) source.setName(sourceUpdate.getPassword());
+        if(sourceUpdate.getPassword() != null) source.setPassword(sourceUpdate.getPassword());
         if(sourceUpdate.getValidAddresses() != null) source.updateValidAddresses(sourceUpdate.getValidAddresses(), em);
         return ResponseEntity.ok(source);
     }
