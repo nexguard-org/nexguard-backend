@@ -1,6 +1,8 @@
 package com.lememz.nexguard;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -44,6 +46,13 @@ public class SourceCrud {
         }
         CriteriaQuery<Source> query = em.getCriteriaBuilder().createQuery(Source.class);
         return ResponseEntity.ok(em.createQuery(query.select(query.from(Source.class))).getResultList());
+    }
+
+    @GetMapping("/list")
+    public Map<Integer, String> getSourceList() {
+        CriteriaQuery<Source> query = em.getCriteriaBuilder().createQuery(Source.class);
+         return em.createQuery(query.select(query.from(Source.class))).getResultList().stream()
+                .collect(Collectors.toMap(Source::getId, Source::getName));
     }
 
     @Transactional
