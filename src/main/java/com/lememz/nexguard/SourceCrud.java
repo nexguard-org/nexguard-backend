@@ -69,17 +69,20 @@ public class SourceCrud {
     @PutMapping("/{id}")
     public ResponseEntity<Source> updateSource(@RequestHeader(HttpHeaders.AUTHORIZATION) String auth, @PathVariable int id, @RequestBody Source sourceUpdate) {
         Source source = em.find(Source.class, id);
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         if(source == null) {
             return ResponseEntity.notFound().build();
         }
         if(source.getPassword() != null &&
                 !apiKey.equals(auth) &&
-                !new BCryptPasswordEncoder().matches(auth, source.getPassword())
+                !encoder.matches(auth, source.getPassword())
         ) {
             return ResponseEntity.status(401).build();
         }
         if(sourceUpdate.getName() != null) source.setName(sourceUpdate.getName());
-        if(sourceUpdate.getPassword() != null) source.setPassword(sourceUpdate.getPassword());
+        if(sourceUpdate.getPassword() != null) {
+            source.setPassword(sourceUpdate.getPassword().isEmpty() ? null : encoder.encode(sourceUpdate.getPassword()));
+        }
         if(sourceUpdate.getValidAddresses() != null) source.updateValidAddresses(sourceUpdate.getValidAddresses(), em);
         return ResponseEntity.ok(source);
     }
