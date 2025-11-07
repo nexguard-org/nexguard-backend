@@ -19,7 +19,7 @@ public class Database {
         try {
             LocalSessionFactoryBean factory = new LocalSessionFactoryBean();
             Properties props = new Properties();
-            props.load(ClassLoader.getSystemResourceAsStream("hibernate.properties"));
+            props.load(this.getClass().getClassLoader().getResourceAsStream("hibernate.properties"));
             factory.setHibernateProperties(props);
             factory.setAnnotatedClasses(Source.class, ValidAddress.class);
             factory.setDataSource(dataSource);
